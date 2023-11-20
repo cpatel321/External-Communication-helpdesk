@@ -1,0 +1,172 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+          background-color: #f8f9fa; /* Light background color for the rest of the page */
+        }
+        .navbar {
+          background-color: #343a40; /* Dark background color for the navbar */
+          color: #ffffff; /* Light text color */
+        }
+      </style>
+</head>
+<body>
+<div class="container-xxl">
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="#">
+            <img src="iitgn_logo.png" width="30" height="30" class="d-inline-block align-top" alt="Your Logo">
+            IITGN Helpdesk  
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <input type="text" id="searchBar" class="searchbar search-bar" placeholder="Search queries...">
+                <div class="logout">
+                    <li class="nav-item">
+                        <a class="btn logout-button" id="logoutButton">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+
+                </div>
+            </ul>
+        </div>
+    </nav>
+</div>
+    
+    <div class="controls">
+        <select id="sortQueries" class="sort-queries">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+        </select>
+        
+        <!-- <button id="logoutButton" class="btn btn-primary logout-button">Logout</button> -->
+    </div>
+<table id="queriesTable">
+    <tr class="m-3">
+        <th>ID</th>
+        <th>Date</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Type</th>
+        <th>Media/Link</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    <!-- Data rows will be inserted here by jQuery -->
+</table>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    // Load the admin queries when the page loads
+    function fetchQueries(searchTerm = '', sortOrder = 'newest') {
+        $.ajax({
+            url: 'admin_panel.php',
+            type: 'GET',
+            data: {search: searchTerm, sort: sortOrder},
+            dataType: 'json',
+            success: function(queries){
+                if(queries.error) {
+                    // Handle the error, maybe redirect to login
+                    alert(queries.error);
+                    window.location.href = 'admin_login.html';
+                } else {
+                    // Clear existing rows
+                    $('#queriesTable tr:not(:first)').remove();
+                    // Insert the data into the table
+                    $.each(queries, function(i, query) {
+                        var actionButtonText = query.status === 'open' ? 'Resolve' : 'Reopen';
+                        $('#queriesTable').append(
+                            `<tr>
+                                <td>${query.query_id}</td>
+                                <td>${query.create_date}</td>
+                                <td>${query.name}</td>
+                                <td>${query.department}</td>
+                                <td>${query.query_type}</td>
+                                <td>${query.query_type === 'Social Media' ? `<a href="${query.image_video}">View Media</a>` : `<a href="${query.website_link}">${query.website_link}</a>`}</td>
+                                <td>${query.description}</td>
+                                <td id="status-${query.query_id}">${query.status}</td>
+                                <td><button onclick="updateStatus(${query.query_id})">${actionButtonText}</button></td>
+                            </tr>`
+                        );
+                    });
+                }
+            },
+            error: function(){
+                alert('Error fetching data.');
+            }
+        });
+    }
+
+    // Listen for sort order changes
+    $('#sortQueries').change(function() {
+        fetchQueries($('#searchBar').val(), $(this).val());
+    });
+
+    // Listen for search input
+    $('#searchBar').on('input', function() {
+        fetchQueries($(this).val(), $('#sortQueries').val());
+    });
+
+    // Initial fetch
+    fetchQueries();
+
+    // Logout button logic
+    $('#logoutButton').click(function(){
+        $.ajax({
+            url: 'admin_logout.php',
+            type: 'POST',
+            success: function(response){
+                // Redirect to login after logout
+                window.location.href = 'admin_login.html';
+            }
+        });
+    });
+});
+
+function updateStatus(queryId) {
+  const statusElement = document.getElementById(`status-${queryId}`);
+  const currentStatus = statusElement.innerText.toLowerCase();
+  const newStatus = currentStatus === 'open' ? 'resolved' : 'open';
+
+  fetch('update_status.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `query_id=${queryId}&current_status=${currentStatus}`,
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Update the UI with the new status
+      statusElement.innerText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+      const buttonElement = statusElement.nextElementSibling.children[0];
+      buttonElement.innerText = newStatus === 'open' ? 'Resolve' : 'Reopen';
+    } else {
+      // Handle failure
+      alert('Failed to update status. Please try again.');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred while updating the status. Please try again.');
+  });
+}
+</script>
+
+</body>

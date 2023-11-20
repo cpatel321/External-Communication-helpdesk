@@ -1,0 +1,31 @@
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-content">
+          <span class="topbar-text">IIT Gandhinagar</span>
+          <img src="iitgn_logo.png" alt="IIT Gandhinagar Logo" class="topbar-logo">
+        </div>
+    </div>
+    <form action="admin_registration.php" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        
+        <label for="adminType">Admin Type:</label>
+        <select name="adminType" id="adminType" required>
+            <option value="Super Admin">Super Admin</option>
+            <option value="Social Media Admin">Social Media Admin</option>
+            <option value="Websites Admin">Websites Admin</option>
+            <option value="PhotoVideography Admin">PhotoVideography Admin</option>
+        </select>
+        
+        <input type="submit" value="Register">
+    </form>
+</body>

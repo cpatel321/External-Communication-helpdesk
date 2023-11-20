@@ -1,0 +1,159 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Query Form</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+           body {
+            background-color: #f8f9fa;
+            font-family:  sans-serif;
+        }
+       
+        .navbar {
+          background-color: #343a40; /* Dark background color for the navbar */
+          color: #ffffff; /* Light text color */
+        }
+
+        #queryForm {
+            max-width: 600px;
+            width: 60%;
+            margin: auto;
+            margin-top: 50px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        @media screen and (max-width: 600px) {
+            #queryForm {
+        
+            max-width: 600px;
+            width: 100%;
+            margin: auto;
+            margin-top: 50px;
+            }
+
+}
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-content">
+          <span class="topbar-text">IIT Gandhinagar</span>
+          <img src="iitgn_logo.png" alt="IIT Gandhinagar Logo" class="topbar-logo">
+        </div>
+    </div>
+
+    <h2 class="text-center" style="text-align: center;
+    padding: 20px;
+    margin-top: 30px;">
+        Fill the Query Form
+    </h2>
+    <form action="query_form.php" method="post" id="queryForm">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" class="form-control" maxlength="100" required>
+        </div>
+    
+        <div class="form-group">
+            <label for="department">Department:</label>
+            <input type="text" id="department" name="department" class="form-control" maxlength="50" required>
+        </div>
+    
+        <div class="form-group">
+            <label for="queryType">Query Type:</label>
+            <select name="queryType" id="queryType" class="form-control" onchange="showFields(this.value)">
+                <option value="">Select...</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Websites">Websites</option>
+                <option value="PhotoVideography">Photo/Videography</option>
+            </select>
+        </div>
+    
+        <div id="SocialMediaFields" style="display:none;" class="form-group">
+            <label for="imageVideo">Image/Video:</label>
+            <input type="text" id="imageVideo" name="imageVideo" class="form-control">
+    
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" form="queryForm" class="form-control"></textarea>
+        </div>
+    
+        <div id="WebsitesFields" style="display:none;" class="form-group">
+            <label for="websiteLink">Link to the Website:</label>
+            <input type="text" id="websiteLink" name="websiteLink" class="form-control">
+    
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" form="queryForm" class="form-control"></textarea>
+        </div>
+    
+        <div id="PhotoVideographyFields" style="display:none;" class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" form="queryForm" class="form-control"></textarea>
+        </div>
+    
+        <input type="submit" value="Submit Query" class="btn btn-primary">
+    </form>
+    <script>
+        function showFields(queryType) {
+            document.getElementById('SocialMediaFields').style.display = 'none';
+            document.getElementById('WebsitesFields').style.display = 'none';
+            document.getElementById('PhotoVideographyFields').style.display = 'none';
+
+            if (queryType === 'Social Media') {
+                document.getElementById('SocialMediaFields').style.display = 'block';
+            } else if (queryType === 'Websites') {
+                document.getElementById('WebsitesFields').style.display = 'block';
+            } else if (queryType === 'PhotoVideography') {
+                document.getElementById('PhotoVideographyFields').style.display = 'block';
+            }
+        }
+
+        function showSuccessMessage() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Query submitted successfully.',
+        });
+    }
+
+    // Function to show SweetAlert error message
+    function showErrorMessage() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Query submission failed. Please try again.',
+        });
+    }
+
+    function submitForm() {
+        // Prevent the default form submission
+        event.preventDefault();
+
+        // Get form data
+        var formData = $('#queryForm').serialize();
+
+        // Submit the form using Ajax
+        $.ajax({
+            type: 'POST',
+            url: 'query_form.php',
+            data: formData,
+            success: function () {
+                // If the submission is successful, show the success message
+                showSuccessMessage();
+            },
+            error: function () {
+                // If there's an error, show the error message
+                showErrorMessage();
+            }
+        });
+    }
+
+    // Attach the submitForm function to the form submission event
+    $('#queryForm').submit(submitForm);
+
+    </script>
+</body>
+
